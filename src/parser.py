@@ -292,15 +292,13 @@ class Parser:
 
     def if_statement(self):
         """
-        if_statement : SI LPAREN logical_expr RPAREN ENTONCES statement* FIN_SI
+        if_statement : SI logical_expr ENTONCES statement* FIN_SI
         
         Procesa estructuras condicionales:
-        - si (condición) entonces sentencias fin_si
+        - si condición entonces sentencias fin_si
         """
         self.eat(TokenType.SI)
-        self.eat(TokenType.LPAREN)
         condition = self.logical_expr()
-        self.eat(TokenType.RPAREN)
         self.eat(TokenType.ENTONCES)
         
         then_body = []
@@ -318,15 +316,13 @@ class Parser:
 
     def while_statement(self):
         """
-        while_statement : MIENTRAS LPAREN logical_expr RPAREN HACER statement* FIN_MIENTRAS
+        while_statement : MIENTRAS logical_expr HACER statement* FIN_MIENTRAS
         
         Procesa estructuras de bucle:
-        - mientras (condición) hacer sentencias fin_mientras
+        - mientras condición hacer sentencias fin_mientras
         """
         self.eat(TokenType.MIENTRAS)
-        self.eat(TokenType.LPAREN)
         condition = self.logical_expr()
-        self.eat(TokenType.RPAREN)
         self.eat(TokenType.HACER)
         
         body = []

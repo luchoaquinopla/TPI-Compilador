@@ -1,0 +1,6 @@
+var x;
+var y;
+x = 5;
+y = 3;
+print(x sumar y);
+print(x multiplicar y); 

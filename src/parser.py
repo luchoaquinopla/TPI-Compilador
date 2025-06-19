@@ -1,4 +1,4 @@
-from src.lexer import TokenType, Token
+from .lexer import TokenType, Token
 
 # Clase base para todos los nodos del Árbol de Sintaxis Abstracta (AST)
 class AST:
@@ -95,7 +95,7 @@ class Parser:
 
     def term(self):
         """
-        term : factor ((MULTIPLY | DIVIDE) factor)*
+        term : factor ((MULTIPLICAR | DIVIDIR) factor)*
         
         Procesa términos en expresiones:
         - Multiplicaciones
@@ -103,12 +103,12 @@ class Parser:
         """
         node = self.factor()
 
-        while self.current_token.type in (TokenType.MULTIPLY, TokenType.DIVIDE):
+        while self.current_token.type in (TokenType.MULTIPLICAR, TokenType.DIVIDIR):
             token = self.current_token
-            if token.type == TokenType.MULTIPLY:
-                self.eat(TokenType.MULTIPLY)
-            elif token.type == TokenType.DIVIDE:
-                self.eat(TokenType.DIVIDE)
+            if token.type == TokenType.MULTIPLICAR:
+                self.eat(TokenType.MULTIPLICAR)
+            elif token.type == TokenType.DIVIDIR:
+                self.eat(TokenType.DIVIDIR)
 
             node = BinOp(left=node, op=token, right=self.factor())
 
@@ -116,23 +116,23 @@ class Parser:
 
     def power(self):
         """
-        power : term (POWER term)*
+        power : term (POTENCIA term)*
         
         Procesa potencias en expresiones:
         - Términos elevados a una potencia
         """
         node = self.term()
 
-        while self.current_token.type == TokenType.POWER:
+        while self.current_token.type == TokenType.POTENCIA:
             token = self.current_token
-            self.eat(TokenType.POWER)
+            self.eat(TokenType.POTENCIA)
             node = BinOp(left=node, op=token, right=self.term())
 
         return node
 
     def expr(self):
         """
-        expr : power ((PLUS | MINUS) power)*
+        expr : power ((SUMAR | RESTAR) power)*
         
         Procesa expresiones:
         - Sumas
@@ -140,12 +140,12 @@ class Parser:
         """
         node = self.power()
 
-        while self.current_token.type in (TokenType.PLUS, TokenType.MINUS):
+        while self.current_token.type in (TokenType.SUMAR, TokenType.RESTAR):
             token = self.current_token
-            if token.type == TokenType.PLUS:
-                self.eat(TokenType.PLUS)
-            elif token.type == TokenType.MINUS:
-                self.eat(TokenType.MINUS)
+            if token.type == TokenType.SUMAR:
+                self.eat(TokenType.SUMAR)
+            elif token.type == TokenType.RESTAR:
+                self.eat(TokenType.RESTAR)
 
             node = BinOp(left=node, op=token, right=self.power())
 

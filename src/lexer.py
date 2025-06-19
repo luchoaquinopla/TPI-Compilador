@@ -1,146 +1,115 @@
 from enum import Enum, auto
 
 class TokenType(Enum):
-    # Palabras reservadas
+    # Palabras clave
     VAR = auto()
     PRINT = auto()
     
-    # Operadores
-    PLUS = auto()      # +
-    MINUS = auto()     # -
-    MULTIPLY = auto()  # *
-    DIVIDE = auto()    # /
-    POWER = auto()     # ^
-    ASSIGN = auto()    # =
+    # Operadores como palabras
+    SUMAR = auto()      # en lugar de PLUS
+    RESTAR = auto()     # en lugar de MINUS
+    MULTIPLICAR = auto() # en lugar de MULTIPLY
+    DIVIDIR = auto()    # en lugar de DIVIDE
+    POTENCIA = auto()   # en lugar de POWER
     
-    # Identificadores y literales
-    IDENTIFIER = auto()
+    # Otros tokens
     NUMBER = auto()
-    
-    # Delimitadores
-    SEMICOLON = auto() # ;
-    LPAREN = auto()    # (
-    RPAREN = auto()    # )
-    
-    # Fin de archivo
+    IDENTIFIER = auto()
+    ASSIGN = auto()
+    LPAREN = auto()
+    RPAREN = auto()
+    SEMICOLON = auto()
     EOF = auto()
 
 class Token:
-    def __init__(self, type: TokenType, value: str, line: int, column: int):
+    def __init__(self, type, value):
         self.type = type
         self.value = value
-        self.line = line
-        self.column = column
-    
+
     def __str__(self):
-        return f"Token({self.type}, '{self.value}', line={self.line}, col={self.column})"
+        return f'Token({self.type}, {self.value})'
 
 class Lexer:
-    def __init__(self, source: str):
-        self.source = source
-        self.position = 0
-        self.line = 1
-        self.column = 1
-        self.current_char = self.source[0] if source else None
-        
-        # Diccionario de palabras reservadas
-        self.keywords = {
-            'var': TokenType.VAR,
-            'print': TokenType.PRINT
-        }
-    
+    def __init__(self, text):
+        self.text = text
+        self.pos = 0
+        self.current_char = self.text[0] if text else None
+
+    def error(self):
+        raise Exception('Carácter inválido')
+
     def advance(self):
-        """Avanza al siguiente carácter en el código fuente."""
-        self.position += 1
-        self.column += 1
-        
-        if self.position >= len(self.source):
+        self.pos += 1
+        if self.pos > len(self.text) - 1:
             self.current_char = None
         else:
-            self.current_char = self.source[self.position]
-            
-            if self.current_char == '\n':
-                self.line += 1
-                self.column = 0
-    
+            self.current_char = self.text[self.pos]
+
     def skip_whitespace(self):
-        """Omite espacios en blanco y saltos de línea."""
-        while self.current_char and self.current_char.isspace():
+        while self.current_char is not None and self.current_char.isspace():
             self.advance()
-    
+
     def number(self):
-        """Procesa números."""
         result = ''
-        while self.current_char and self.current_char.isdigit():
+        while self.current_char is not None and self.current_char.isdigit():
             result += self.current_char
             self.advance()
-        return Token(TokenType.NUMBER, result, self.line, self.column - len(result))
-    
+        return int(result)
+
     def identifier(self):
-        """Procesa identificadores y palabras reservadas."""
         result = ''
-        start_column = self.column
-        
-        while self.current_char and (self.current_char.isalnum() or self.current_char == '_'):
+        while self.current_char is not None and (self.current_char.isalnum() or self.current_char == '_'):
             result += self.current_char
             self.advance()
-        
-        token_type = self.keywords.get(result.lower(), TokenType.IDENTIFIER)
-        return Token(token_type, result, self.line, start_column)
-    
+        return result
+
     def get_next_token(self):
-        """Obtiene el siguiente token del código fuente."""
-        while self.current_char:
-            # Omite espacios en blanco
+        while self.current_char is not None:
             if self.current_char.isspace():
                 self.skip_whitespace()
                 continue
-            
-            # Números
+
             if self.current_char.isdigit():
-                return self.number()
-            
-            # Identificadores y palabras reservadas
+                return Token(TokenType.NUMBER, self.number())
+
             if self.current_char.isalpha():
-                return self.identifier()
-            
-            # Operadores y delimitadores
-            if self.current_char == '+':
-                self.advance()
-                return Token(TokenType.PLUS, '+', self.line, self.column - 1)
-            
-            if self.current_char == '-':
-                self.advance()
-                return Token(TokenType.MINUS, '-', self.line, self.column - 1)
-            
-            if self.current_char == '*':
-                self.advance()
-                return Token(TokenType.MULTIPLY, '*', self.line, self.column - 1)
-            
-            if self.current_char == '/':
-                self.advance()
-                return Token(TokenType.DIVIDE, '/', self.line, self.column - 1)
-            
-            if self.current_char == '^':
-                self.advance()
-                return Token(TokenType.POWER, '^', self.line, self.column - 1)
-            
+                identifier = self.identifier()
+                
+                # Palabras clave
+                if identifier == 'var':
+                    return Token(TokenType.VAR, identifier)
+                elif identifier == 'print':
+                    return Token(TokenType.PRINT, identifier)
+                # Operadores como palabras
+                elif identifier == 'sumar':
+                    return Token(TokenType.SUMAR, identifier)
+                elif identifier == 'restar':
+                    return Token(TokenType.RESTAR, identifier)
+                elif identifier == 'multiplicar':
+                    return Token(TokenType.MULTIPLICAR, identifier)
+                elif identifier == 'dividir':
+                    return Token(TokenType.DIVIDIR, identifier)
+                elif identifier == 'potencia':
+                    return Token(TokenType.POTENCIA, identifier)
+                else:
+                    return Token(TokenType.IDENTIFIER, identifier)
+
             if self.current_char == '=':
                 self.advance()
-                return Token(TokenType.ASSIGN, '=', self.line, self.column - 1)
-            
-            if self.current_char == ';':
-                self.advance()
-                return Token(TokenType.SEMICOLON, ';', self.line, self.column - 1)
-            
+                return Token(TokenType.ASSIGN, '=')
+
             if self.current_char == '(':
                 self.advance()
-                return Token(TokenType.LPAREN, '(', self.line, self.column - 1)
-            
+                return Token(TokenType.LPAREN, '(')
+
             if self.current_char == ')':
                 self.advance()
-                return Token(TokenType.RPAREN, ')', self.line, self.column - 1)
-            
-            raise Exception(f"Carácter inválido: {self.current_char} en línea {self.line}, columna {self.column}")
-        
-        return Token(TokenType.EOF, '', self.line, self.column) 
+                return Token(TokenType.RPAREN, ')')
+
+            if self.current_char == ';':
+                self.advance()
+                return Token(TokenType.SEMICOLON, ';')
+
+            self.error()
+
+        return Token(TokenType.EOF, None) 

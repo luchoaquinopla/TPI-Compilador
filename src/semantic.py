@@ -1,4 +1,4 @@
-from parser import AST, BinOp, Num, Var, Assign, Print, VarDecl
+from .parser import AST, BinOp, Num, Var, Assign, Print, VarDecl
 
 class SemanticError(Exception):
     pass

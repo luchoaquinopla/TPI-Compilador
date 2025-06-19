@@ -2,9 +2,9 @@ import tkinter as tk
 from tkinter import ttk, scrolledtext
 import time
 from typing import List, Dict
-from .lexer import Lexer, Token
-from .parser import Parser, AST, BinOp, Num, Var, Assign, Print, VarDecl
-from .semantic import SemanticAnalyzer
+from lexer import Lexer, Token
+from parser import Parser, AST, BinOp, Num, Var, Assign, Print, VarDecl, Condition, LogicalOp, If, While
+from semantic import SemanticAnalyzer
 import threading
 
 class CompilerGUI:
@@ -33,11 +33,7 @@ class CompilerGUI:
         
         self.code_editor = scrolledtext.ScrolledText(code_frame, width=60, height=10)
         self.code_editor.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        self.code_editor.insert(tk.END, """var x;
-var y;
-x = 5;
-y = 3;
-print(x + y);""")
+        self.code_editor.insert
         
         # Botones de control
         control_frame = ttk.Frame(main_frame, padding="5")
@@ -125,11 +121,23 @@ print(x + y);""")
             # Volver a crear el lexer para el parser
             lexer_for_parser = Lexer(self.source_code)
             try:
+                self.parse_output.insert(tk.END, "Iniciando análisis sintáctico...\n")
+                self.parse_output.see(tk.END)
+                self.root.update()
+                
                 parser = Parser(lexer_for_parser)
+                self.parse_output.insert(tk.END, "Parser creado, generando AST...\n")
+                self.parse_output.see(tk.END)
+                self.root.update()
+                
                 self.ast = parser.program()
+                self.parse_output.insert(tk.END, f"AST generado exitosamente con {len(self.ast) if isinstance(self.ast, list) else 1} nodos principales\n")
                 self.parse_output.insert(tk.END, f"AST generado (estructura):\n")
             except Exception as e:
                 self.parse_output.insert(tk.END, f"Error en el parser: {str(e)}\n")
+                self.parse_output.insert(tk.END, f"Tipo de error: {type(e).__name__}\n")
+                import traceback
+                self.parse_output.insert(tk.END, f"Traceback completo:\n{traceback.format_exc()}\n")
                 self.is_running = False
                 return
             def print_ast(node, level=0):
@@ -180,13 +188,52 @@ print(x + y);""")
                     self.root.update()
                     time.sleep(0.1)
                     print_ast(node.var_node, level + 1)
+                elif isinstance(node, Condition):
+                    info = f"{type(node).__name__}: {node.op.type}"
+                    self.parse_output.insert(tk.END, f"{indent}{info}\n")
+                    self.parse_output.see(tk.END)
+                    self.root.update()
+                    time.sleep(0.1)
+                    print_ast(node.left, level + 1)
+                    print_ast(node.right, level + 1)
+                elif isinstance(node, LogicalOp):
+                    info = f"{type(node).__name__}: {node.op.type}"
+                    self.parse_output.insert(tk.END, f"{indent}{info}\n")
+                    self.parse_output.see(tk.END)
+                    self.root.update()
+                    time.sleep(0.1)
+                    print_ast(node.left, level + 1)
+                    print_ast(node.right, level + 1)
+                elif isinstance(node, If):
+                    info = f"{type(node).__name__}"
+                    self.parse_output.insert(tk.END, f"{indent}{info}\n")
+                    self.parse_output.see(tk.END)
+                    self.root.update()
+                    time.sleep(0.1)
+                    print_ast(node.condition, level + 1)
+                    for stmt in node.then_body:
+                        print_ast(stmt, level + 1)
+                    if node.else_body:
+                        for stmt in node.else_body:
+                            print_ast(stmt, level + 1)
+                elif isinstance(node, While):
+                    info = f"{type(node).__name__}"
+                    self.parse_output.insert(tk.END, f"{indent}{info}\n")
+                    self.parse_output.see(tk.END)
+                    self.root.update()
+                    time.sleep(0.1)
+                    print_ast(node.condition, level + 1)
+                    for stmt in node.body:
+                        print_ast(stmt, level + 1)
                 else:
                     info = f"{type(node).__name__}"
                     self.parse_output.insert(tk.END, f"{indent}{info}\n")
                     self.parse_output.see(tk.END)
                     self.root.update()
                     time.sleep(0.1)
-            if isinstance(self.ast, list):
+            if not self.ast:
+                self.parse_output.insert(tk.END, "¡El AST está vacío!\n")
+            elif isinstance(self.ast, list):
                 for node in self.ast:
                     print_ast(node)
             else:
@@ -207,9 +254,26 @@ print(x + y);""")
                 self.sem_output.see(tk.END)
                 self.root.update()
                 time.sleep(0.1)
-                
-                if isinstance(node, (BinOp, Num, Var, Assign, Print, VarDecl)):
-                    semantic_analyzer.visit(node)
+
+                # Llama al visit y luego recorre los hijos manualmente para mostrar todos los nodos
+                semantic_analyzer.visit(node)
+                # Recorre hijos explícitamente para mostrar todos los nodos
+                if hasattr(node, 'left'):
+                    analyze_node(node.left)
+                if hasattr(node, 'right'):
+                    analyze_node(node.right)
+                if hasattr(node, 'expr'):
+                    analyze_node(node.expr)
+                if hasattr(node, 'var_node'):
+                    analyze_node(node.var_node)
+                if hasattr(node, 'condition'):
+                    analyze_node(node.condition)
+                if hasattr(node, 'then_body'):
+                    for stmt in node.then_body:
+                        analyze_node(stmt)
+                if hasattr(node, 'body'):
+                    for stmt in node.body:
+                        analyze_node(stmt)
             
             analyze_node(self.ast)
             
@@ -306,7 +370,7 @@ print(x + y);""")
                 self.root.update()
                 time.sleep(0.5)  # Más lento para paso a paso
                 
-                if isinstance(node, (BinOp, Num, Var, Assign, Print, VarDecl)):
+                if isinstance(node, (BinOp, Num, Var, Assign, Print, VarDecl, Condition, LogicalOp, If, While)):
                     semantic_analyzer.visit(node)
             
             analyze_node_step(self.ast)

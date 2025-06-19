@@ -1,4 +1,4 @@
-from .parser import AST, BinOp, Num, Var, Assign, Print, VarDecl
+from parser import AST, BinOp, Num, Var, Assign, Print, VarDecl, Condition, LogicalOp, If, While
 
 class SemanticError(Exception):
     pass
@@ -31,7 +31,7 @@ class SemanticAnalyzer:
         right_type = self.visit(node.right)
         
         # Verifica que ambos operandos sean números
-        if not (isinstance(left_type, type) and isinstance(right_type, type)):
+        if left_type != int or right_type != int:
             raise SemanticError(f"Operación inválida: {node.op.type} entre {left_type} y {right_type}")
         
         return int  # El resultado de una operación binaria es siempre un número
@@ -78,6 +78,59 @@ class SemanticAnalyzer:
             raise SemanticError(f"Variable ya declarada: {var_name}")
         
         self.symbol_table.define(Symbol(var_name, int))
+        return None
+
+    def visit_Condition(self, node):
+        """Visita un nodo de condición."""
+        left_type = self.visit(node.left)
+        right_type = self.visit(node.right)
+        
+        # Verifica que ambos operandos sean números
+        if left_type != int or right_type != int:
+            raise SemanticError(f"Condición inválida: {node.op.type} entre {left_type} y {right_type}")
+        
+        return bool  # El resultado de una condición es siempre un booleano
+
+    def visit_LogicalOp(self, node):
+        """Visita un nodo de operación lógica."""
+        left_type = self.visit(node.left)
+        right_type = self.visit(node.right)
+        
+        # Verifica que ambos operandos sean booleanos
+        if left_type != bool or right_type != bool:
+            raise SemanticError(f"Operación lógica inválida: {node.op.type} entre {left_type} y {right_type}")
+        
+        return bool  # El resultado de una operación lógica es siempre un booleano
+
+    def visit_If(self, node):
+        """Visita un nodo de estructura condicional."""
+        # Verifica que la condición sea booleana
+        condition_type = self.visit(node.condition)
+        if condition_type != bool:
+            raise SemanticError(f"Condición del if debe ser booleana, no {condition_type}")
+        
+        # Analiza el cuerpo del then
+        for statement in node.then_body:
+            self.visit(statement)
+        
+        # Analiza el cuerpo del else si existe
+        if node.else_body:
+            for statement in node.else_body:
+                self.visit(statement)
+        
+        return None
+
+    def visit_While(self, node):
+        """Visita un nodo de estructura de bucle."""
+        # Verifica que la condición sea booleana
+        condition_type = self.visit(node.condition)
+        if condition_type != bool:
+            raise SemanticError(f"Condición del while debe ser booleana, no {condition_type}")
+        
+        # Analiza el cuerpo del bucle
+        for statement in node.body:
+            self.visit(statement)
+        
         return None
 
     def visit(self, node):

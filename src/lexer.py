@@ -5,6 +5,26 @@ class TokenType(Enum):
     VAR = auto()
     PRINT = auto()
     
+    # Estructuras de control
+    SI = auto()
+    ENTONCES = auto()
+    FIN_SI = auto()
+    MIENTRAS = auto()
+    HACER = auto()
+    FIN_MIENTRAS = auto()
+    
+    # Operadores de comparación
+    MAYOR = auto()
+    MENOR = auto()
+    IGUAL = auto()
+    DIFERENTE = auto()
+    MAYOR_IGUAL = auto()
+    MENOR_IGUAL = auto()
+    
+    # Operadores lógicos
+    Y = auto()
+    O = auto()
+    
     # Operadores como palabras
     SUMAR = auto()      # en lugar de PLUS
     RESTAR = auto()     # en lugar de MINUS
@@ -75,12 +95,37 @@ class Lexer:
             if self.current_char.isalpha():
                 identifier = self.identifier()
                 
-                # Palabras clave
+                # Palabras clave (más específicas primero)
                 if identifier == 'var':
                     return Token(TokenType.VAR, identifier)
                 elif identifier == 'print':
                     return Token(TokenType.PRINT, identifier)
-                # Operadores como palabras
+                elif identifier == 'si':
+                    return Token(TokenType.SI, identifier)
+                elif identifier == 'entonces':
+                    return Token(TokenType.ENTONCES, identifier)
+                elif identifier == 'fin_si':
+                    return Token(TokenType.FIN_SI, identifier)
+                elif identifier == 'mientras':
+                    return Token(TokenType.MIENTRAS, identifier)
+                elif identifier == 'hacer':
+                    return Token(TokenType.HACER, identifier)
+                elif identifier == 'fin_mientras':
+                    return Token(TokenType.FIN_MIENTRAS, identifier)
+                # Operadores de comparación
+                elif identifier == 'mayor':
+                    return Token(TokenType.MAYOR, identifier)
+                elif identifier == 'menor':
+                    return Token(TokenType.MENOR, identifier)
+                elif identifier == 'igual':
+                    return Token(TokenType.IGUAL, identifier)
+                elif identifier == 'diferente':
+                    return Token(TokenType.DIFERENTE, identifier)
+                elif identifier == 'mayor_igual':
+                    return Token(TokenType.MAYOR_IGUAL, identifier)
+                elif identifier == 'menor_igual':
+                    return Token(TokenType.MENOR_IGUAL, identifier)
+                # Operadores aritméticos
                 elif identifier == 'sumar':
                     return Token(TokenType.SUMAR, identifier)
                 elif identifier == 'restar':
@@ -91,6 +136,12 @@ class Lexer:
                     return Token(TokenType.DIVIDIR, identifier)
                 elif identifier == 'potencia':
                     return Token(TokenType.POTENCIA, identifier)
+                # Operadores lógicos (deben ir después de los identificadores)
+                elif identifier == 'Y':
+                    return Token(TokenType.Y, identifier)
+                elif identifier == 'O':
+                    return Token(TokenType.O, identifier)
+                # Si no es ninguna palabra clave, es un identificador
                 else:
                     return Token(TokenType.IDENTIFIER, identifier)
 

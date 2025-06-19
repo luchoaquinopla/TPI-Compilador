@@ -1,0 +1,32 @@
+// Ejemplo de estructuras de control en VLS
+
+var x;
+var y;
+var i;
+
+x = 10;
+y = 5;
+
+// Estructura condicional simple
+si (x mayor y) entonces
+    print(x);
+fin_si;
+
+// Estructura condicional con operadores lógicos
+si (x mayor 0 Y y mayor 0) entonces
+    print(x sumar y);
+fin_si;
+
+// Bucle while simple
+i = 1;
+mientras (i menor_igual 5) hacer
+    print(i);
+    i = i sumar 1;
+fin_mientras;
+
+// Bucle while con condición compuesta
+i = 10;
+mientras (i mayor 0 Y i diferente 5) hacer
+    print(i);
+    i = i restar 1;
+fin_mientras; 

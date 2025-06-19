@@ -1,4 +1,4 @@
-from .lexer import TokenType, Token
+from lexer import TokenType, Token
 
 # Clase base para todos los nodos del Árbol de Sintaxis Abstracta (AST)
 class AST:
@@ -46,6 +46,37 @@ class VarDecl(AST):
     """Nodo para declaraciones de variables."""
     def __init__(self, var_node):
         self.var_node = var_node  # Nodo de la variable declarada
+
+# Nodo para representar condiciones
+class Condition(AST):
+    """Nodo para condiciones en estructuras de control."""
+    def __init__(self, left, op, right):
+        self.left = left      # Lado izquierdo de la condición
+        self.op = op          # Operador de comparación
+        self.right = right    # Lado derecho de la condición
+
+# Nodo para operaciones lógicas
+class LogicalOp(AST):
+    """Nodo para operaciones lógicas (Y, O)."""
+    def __init__(self, left, op, right):
+        self.left = left      # Lado izquierdo de la operación lógica
+        self.op = op          # Operador lógico (Y, O)
+        self.right = right    # Lado derecho de la operación lógica
+
+# Nodo para estructuras condicionales
+class If(AST):
+    """Nodo para estructuras condicionales."""
+    def __init__(self, condition, then_body, else_body=None):
+        self.condition = condition    # Condición del if
+        self.then_body = then_body    # Cuerpo del then (lista de nodos)
+        self.else_body = else_body    # Cuerpo del else (opcional, lista de nodos)
+
+# Nodo para estructuras de bucle
+class While(AST):
+    """Nodo para estructuras de bucle while."""
+    def __init__(self, condition, body):
+        self.condition = condition    # Condición del while
+        self.body = body              # Cuerpo del bucle (lista de nodos)
 
 class Parser:
     def __init__(self, lexer):
@@ -192,19 +223,128 @@ class Parser:
         self.eat(TokenType.IDENTIFIER)
         return VarDecl(var_node)
 
+    def condition(self):
+        """
+        condition : expr (MAYOR | MENOR | IGUAL | DIFERENTE | MAYOR_IGUAL | MENOR_IGUAL) expr
+        
+        Procesa condiciones:
+        - Expresión Operador Expresión
+        """
+        left = self.expr()
+        
+        if self.current_token.type in (TokenType.MAYOR, TokenType.MENOR, TokenType.IGUAL, 
+                                     TokenType.DIFERENTE, TokenType.MAYOR_IGUAL, TokenType.MENOR_IGUAL):
+            op = self.current_token
+            if op.type == TokenType.MAYOR:
+                self.eat(TokenType.MAYOR)
+            elif op.type == TokenType.MENOR:
+                self.eat(TokenType.MENOR)
+            elif op.type == TokenType.IGUAL:
+                self.eat(TokenType.IGUAL)
+            elif op.type == TokenType.DIFERENTE:
+                self.eat(TokenType.DIFERENTE)
+            elif op.type == TokenType.MAYOR_IGUAL:
+                self.eat(TokenType.MAYOR_IGUAL)
+            elif op.type == TokenType.MENOR_IGUAL:
+                self.eat(TokenType.MENOR_IGUAL)
+            
+            right = self.expr()
+            return Condition(left, op, right)
+        
+        return left
+
+    def logical_expr(self):
+        """
+        logical_expr : condition ((Y | O) condition)*
+        
+        Procesa expresiones lógicas:
+        - Condición Y Condición
+        - Condición O Condición
+        """
+        node = self.condition()
+        
+        while self.current_token.type in (TokenType.Y, TokenType.O):
+            op = self.current_token
+            if op.type == TokenType.Y:
+                self.eat(TokenType.Y)
+            elif op.type == TokenType.O:
+                self.eat(TokenType.O)
+            
+            node = LogicalOp(left=node, op=op, right=self.condition())
+        
+        return node
+
+    def if_statement(self):
+        """
+        if_statement : SI LPAREN logical_expr RPAREN ENTONCES statement* FIN_SI
+        
+        Procesa estructuras condicionales:
+        - si (condición) entonces sentencias fin_si
+        """
+        self.eat(TokenType.SI)
+        self.eat(TokenType.LPAREN)
+        condition = self.logical_expr()
+        self.eat(TokenType.RPAREN)
+        self.eat(TokenType.ENTONCES)
+        
+        then_body = []
+        while (self.current_token.type not in (TokenType.FIN_SI, TokenType.EOF)):
+            statement = self.statement()
+            then_body.append(statement)
+            
+            # Solo agregar punto y coma después de sentencias simples dentro del bloque
+            if (isinstance(statement, (VarDecl, Assign, Print)) and 
+                self.current_token.type == TokenType.SEMICOLON):
+                self.eat(TokenType.SEMICOLON)
+        
+        self.eat(TokenType.FIN_SI)
+        return If(condition, then_body)
+
+    def while_statement(self):
+        """
+        while_statement : MIENTRAS LPAREN logical_expr RPAREN HACER statement* FIN_MIENTRAS
+        
+        Procesa estructuras de bucle:
+        - mientras (condición) hacer sentencias fin_mientras
+        """
+        self.eat(TokenType.MIENTRAS)
+        self.eat(TokenType.LPAREN)
+        condition = self.logical_expr()
+        self.eat(TokenType.RPAREN)
+        self.eat(TokenType.HACER)
+        
+        body = []
+        while (self.current_token.type not in (TokenType.FIN_MIENTRAS, TokenType.EOF)):
+            statement = self.statement()
+            body.append(statement)
+            
+            # Solo agregar punto y coma después de sentencias simples dentro del bloque
+            if (isinstance(statement, (VarDecl, Assign, Print)) and 
+                self.current_token.type == TokenType.SEMICOLON):
+                self.eat(TokenType.SEMICOLON)
+        
+        self.eat(TokenType.FIN_MIENTRAS)
+        return While(condition, body)
+
     def statement(self):
         """
-        statement : var_declaration | assignment | print_statement
+        statement : var_declaration | assignment | print_statement | if_statement | while_statement
         
         Procesa sentencias:
         - Declaraciones de variables
         - Asignaciones
         - Instrucciones de impresión
+        - Estructuras condicionales
+        - Estructuras de bucle
         """
         if self.current_token.type == TokenType.VAR:
             return self.var_declaration()
         elif self.current_token.type == TokenType.PRINT:
             return self.print_statement()
+        elif self.current_token.type == TokenType.SI:
+            return self.if_statement()
+        elif self.current_token.type == TokenType.MIENTRAS:
+            return self.while_statement()
         elif self.current_token.type == TokenType.IDENTIFIER:
             return self.assignment()
         else:
@@ -215,10 +355,18 @@ class Parser:
         program : statement*
         
         Procesa un programa completo:
-        - Secuencia de sentencias separadas por punto y coma
+        - Secuencia de sentencias
+        - Las sentencias simples terminan con punto y coma
+        - Las estructuras de control no terminan con punto y coma
         """
         statements = []
         while self.current_token.type != TokenType.EOF:
-            statements.append(self.statement())
-            self.eat(TokenType.SEMICOLON)
+            statement = self.statement()
+            statements.append(statement)
+            
+            # Solo agregar punto y coma después de sentencias simples
+            if (isinstance(statement, (VarDecl, Assign, Print)) and 
+                self.current_token.type == TokenType.SEMICOLON):
+                self.eat(TokenType.SEMICOLON)
+        
         return statements 

@@ -114,6 +114,60 @@ Desde la carpeta raíz del proyecto, ejecuta:
 python -m src.gui
 ```
 
+O para una experiencia completa con información de características:
+
+```sh
+python test_visualization.py
+```
+
+---
+
+## 🎨 Visualización Animada de Tokens
+
+### Nueva Funcionalidad Implementada
+
+El compilador VLS ahora incluye una **visualización animada de tokens** que hace el proceso de análisis léxico más visual y educativo:
+
+#### Características de la Visualización:
+
+- **🎯 Tarjetas Animadas**: Los tokens aparecen como "tarjetas" o "burbujas" en un canvas dedicado
+- **🌈 Colores por Tipo**: Cada tipo de token tiene un color distintivo:
+  - **Palabras clave** (var, print, si, mientras): Azules y verdes
+  - **Operadores** (sumar, multiplicar, mayor): Amarillos y naranjas
+  - **Números**: Verde esmeralda
+  - **Identificadores**: Naranja
+  - **Cadenas**: Amarillo
+  - **Símbolos** (paréntesis, punto y coma): Rosas y púrpuras
+- **✨ Efecto de Aparición**: Las tarjetas aparecen con un efecto de escala animada
+- **📊 Estadísticas**: Se muestran estadísticas de tipos de tokens generados
+- **🔄 Efecto Cascada**: Los tokens aparecen uno tras otro con delays progresivos
+- **📜 Scroll Automático**: El canvas se ajusta automáticamente para mostrar todos los tokens
+
+#### Cómo Usar la Visualización:
+
+1. **Cargar un Ejemplo**: Haz clic en "Ejemplo Completo" para cargar código de prueba
+2. **Compilar**: Haz clic en "Compilar" para iniciar el análisis
+3. **Observar**: Ve cómo aparecen las tarjetas de tokens una por una
+4. **Limpiar**: Usa "Limpiar Tokens" para reiniciar la visualización
+
+#### Ejemplo de Visualización:
+
+```
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│      VAR        │  │   IDENTIFIER    │  │     ASSIGN      │
+│                 │  │                 │  │                 │
+│    var: var     │  │   nombre: x     │  │      =: =       │
+└─────────────────┘  └─────────────────┘  └─────────────────┘
+
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│     STRING      │  │     PRINT       │  │   IDENTIFIER    │
+│                 │  │                 │  │                 │
+│ "Hola": "Hola"  │  │  print: print   │  │   edad: edad    │
+└─────────────────┘  └─────────────────┘  └─────────────────┘
+```
+
+Esta visualización hace que el proceso de análisis léxico sea más intuitivo y ayuda a entender cómo el compilador "ve" y clasifica cada elemento del código fuente.
+
 ---
 
 ## Ejemplo de error detectado
@@ -140,3 +194,7 @@ fin_mientras;
 ---
 
 **¡Explora, aprende y visualiza cómo funciona un compilador paso a paso con VLS!**
+
+```
+
+```

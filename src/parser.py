@@ -78,6 +78,13 @@ class While(AST):
         self.condition = condition    # Condición del while
         self.body = body              # Cuerpo del bucle (lista de nodos)
 
+# Nodo para representar cadenas literales
+class String(AST):
+    """Nodo para cadenas."""
+    def __init__(self, token):
+        self.token = token
+        self.value = token.value
+
 class Parser:
     def __init__(self, lexer):
         self.lexer = lexer    # Instancia del analizador léxico
@@ -99,7 +106,7 @@ class Parser:
 
     def factor(self):
         """
-        factor : NUMBER | LPAREN expr RPAREN | IDENTIFIER
+        factor : NUMBER | STRING | LPAREN expr RPAREN | IDENTIFIER
         
         Procesa factores en expresiones:
         - Números literales
@@ -111,6 +118,10 @@ class Parser:
         if token.type == TokenType.NUMBER:
             self.eat(TokenType.NUMBER)
             return Num(token)
+        
+        elif token.type == TokenType.STRING:
+            self.eat(TokenType.STRING)
+            return String(token)
         
         elif token.type == TokenType.IDENTIFIER:
             self.eat(TokenType.IDENTIFIER)
@@ -161,25 +172,30 @@ class Parser:
 
         return node
 
-    def expr(self):
+    def concat_expr(self):
         """
-        expr : power ((SUMAR | RESTAR) power)*
-        
-        Procesa expresiones:
-        - Sumas
-        - Restas
+        concat_expr : power (CONCATENAR power)*
+        Permite concatenar cadenas y expresiones.
         """
         node = self.power()
+        while self.current_token.type == TokenType.CONCATENAR:
+            token = self.current_token
+            self.eat(TokenType.CONCATENAR)
+            node = BinOp(left=node, op=token, right=self.power())
+        return node
 
+    def expr(self):
+        """
+        expr : concat_expr ((SUMAR | RESTAR) concat_expr)*
+        """
+        node = self.concat_expr()
         while self.current_token.type in (TokenType.SUMAR, TokenType.RESTAR):
             token = self.current_token
             if token.type == TokenType.SUMAR:
                 self.eat(TokenType.SUMAR)
             elif token.type == TokenType.RESTAR:
                 self.eat(TokenType.RESTAR)
-
-            node = BinOp(left=node, op=token, right=self.power())
-
+            node = BinOp(left=node, op=token, right=self.concat_expr())
         return node
 
     def assignment(self):

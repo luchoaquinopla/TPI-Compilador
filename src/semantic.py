@@ -1,4 +1,4 @@
-from parser import AST, BinOp, Num, Var, Assign, Print, VarDecl, Condition, LogicalOp, If, While
+from parser import AST, BinOp, Num, Var, Assign, Print, VarDecl, Condition, LogicalOp, If, While, String
 
 class SemanticError(Exception):
     pass
@@ -30,11 +30,16 @@ class SemanticAnalyzer:
         left_type = self.visit(node.left)
         right_type = self.visit(node.right)
         
-        # Verifica que ambos operandos sean números
-        if left_type != int or right_type != int:
-            raise SemanticError(f"Operación inválida: {node.op.type} entre {left_type} y {right_type}")
-        
-        return int  # El resultado de una operación binaria es siempre un número
+        # Concatenación de cadenas
+        if node.op.type.name == 'CONCATENAR':
+            if left_type == str and right_type == str:
+                return str
+            else:
+                raise SemanticError("La operación 'concatenar' solo es válida entre cadenas")
+        # Operaciones numéricas
+        if left_type == int and right_type == int:
+            return int
+        raise SemanticError(f"Operación inválida: {node.op.type} entre {left_type} y {right_type}")
 
     def visit_Num(self, node):
         """Visita un nodo de número."""
@@ -60,10 +65,12 @@ class SemanticAnalyzer:
         
         value_type = self.visit(node.right)
         
-        # Verificamos que el tipo del valor sea int
-        if value_type != int:
-            raise SemanticError(f"No se puede asignar {value_type} a una variable numérica")
+        # Permitimos asignar int o str
+        if value_type not in (int, str):
+            raise SemanticError(f"No se puede asignar {value_type} a una variable")
         
+        # Actualiza el tipo de la variable en la tabla de símbolos
+        symbol.type = value_type
         return value_type
 
     def visit_Print(self, node):
@@ -132,6 +139,10 @@ class SemanticAnalyzer:
             self.visit(statement)
         
         return None
+
+    def visit_String(self, node):
+        """Visita un nodo de cadena."""
+        return str
 
     def visit(self, node):
         """Método principal para visitar nodos del AST."""

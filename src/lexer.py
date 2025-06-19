@@ -31,6 +31,7 @@ class TokenType(Enum):
     MULTIPLICAR = auto() # en lugar de MULTIPLY
     DIVIDIR = auto()    # en lugar de DIVIDE
     POTENCIA = auto()   # en lugar de POWER
+    CONCATENAR = auto()
     
     # Otros tokens
     NUMBER = auto()
@@ -40,6 +41,7 @@ class TokenType(Enum):
     RPAREN = auto()
     SEMICOLON = auto()
     EOF = auto()
+    STRING = auto()
 
 class Token:
     def __init__(self, type, value):
@@ -83,11 +85,26 @@ class Lexer:
             self.advance()
         return result
 
+    def string(self):
+        result = ''
+        self.advance()  # Saltar la comilla inicial
+        while self.current_char is not None and self.current_char != '"':
+            result += self.current_char
+            self.advance()
+        if self.current_char == '"':
+            self.advance()  # Saltar la comilla final
+            return result
+        else:
+            self.error()  # Cadena no cerrada
+
     def get_next_token(self):
         while self.current_char is not None:
             if self.current_char.isspace():
                 self.skip_whitespace()
                 continue
+
+            if self.current_char == '"':
+                return Token(TokenType.STRING, self.string())
 
             if self.current_char.isdigit():
                 return Token(TokenType.NUMBER, self.number())
@@ -141,6 +158,8 @@ class Lexer:
                     return Token(TokenType.Y, identifier)
                 elif identifier == 'O':
                     return Token(TokenType.O, identifier)
+                elif identifier == 'concatenar':
+                    return Token(TokenType.CONCATENAR, identifier)
                 # Si no es ninguna palabra clave, es un identificador
                 else:
                     return Token(TokenType.IDENTIFIER, identifier)

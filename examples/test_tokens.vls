@@ -7,12 +7,12 @@ edad = 25;
 resultado = edad multiplicar 2;
 
 si edad mayor 18 entonces
-    print("Eres mayor de edad");
+    mostrar("Eres mayor de edad");
 fin_si
 
 mientras edad menor 30 hacer
-    print(edad);
+    mostrar(edad);
     edad = edad sumar 1;
 fin_mientras
 
-print(nombre concatenar " tiene " concatenar edad); 
+mostrar(nombre concatenar " tiene " concatenar edad); 

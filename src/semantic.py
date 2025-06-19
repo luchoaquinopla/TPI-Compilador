@@ -73,8 +73,8 @@ class SemanticAnalyzer:
         symbol.type = value_type
         return value_type
 
-    def visit_Print(self, node):
-        """Visita un nodo de impresión."""
+    def visit_Mostrar(self, node):
+        """Visita un nodo de instrucción mostrar."""
         return self.visit(node.expr)
 
     def visit_VarDecl(self, node):

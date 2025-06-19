@@ -36,10 +36,10 @@ class Assign(AST):
         self.right = right    # Nodo de la expresión a asignar
 
 # Nodo para representar instrucciones de impresión
-class Print(AST):
-    """Nodo para instrucciones de impresión."""
+class Mostrar(AST):
+    """Nodo para instrucciones de mostrar."""
     def __init__(self, expr):
-        self.expr = expr      # Nodo de la expresión a imprimir
+        self.expr = expr      # Nodo de la expresión a mostrar
 
 # Nodo para representar declaraciones de variables
 class VarDecl(AST):
@@ -214,18 +214,17 @@ class Parser:
         right = self.expr()
         return Assign(left, token, right)
 
-    def print_statement(self):
+    def mostrar_statement(self):
         """
-        print_statement : PRINT LPAREN expr RPAREN
-        
-        Procesa instrucciones de impresión:
-        - print(Expresión)
+        mostrar_statement : MOSTRAR LPAREN expr RPAREN
+        Procesa instrucciones de mostrar:
+        - mostrar(Expresión)
         """
-        self.eat(TokenType.PRINT)
+        self.eat(TokenType.MOSTRAR)
         self.eat(TokenType.LPAREN)
         expr = self.expr()
         self.eat(TokenType.RPAREN)
-        return Print(expr)
+        return Mostrar(expr)
 
     def var_declaration(self):
         """
@@ -307,7 +306,7 @@ class Parser:
             then_body.append(statement)
             
             # Solo agregar punto y coma después de sentencias simples dentro del bloque
-            if (isinstance(statement, (VarDecl, Assign, Print)) and 
+            if (isinstance(statement, (VarDecl, Assign, Mostrar)) and 
                 self.current_token.type == TokenType.SEMICOLON):
                 self.eat(TokenType.SEMICOLON)
         
@@ -331,7 +330,7 @@ class Parser:
             body.append(statement)
             
             # Solo agregar punto y coma después de sentencias simples dentro del bloque
-            if (isinstance(statement, (VarDecl, Assign, Print)) and 
+            if (isinstance(statement, (VarDecl, Assign, Mostrar)) and 
                 self.current_token.type == TokenType.SEMICOLON):
                 self.eat(TokenType.SEMICOLON)
         
@@ -340,19 +339,19 @@ class Parser:
 
     def statement(self):
         """
-        statement : var_declaration | assignment | print_statement | if_statement | while_statement
+        statement : var_declaration | assignment | mostrar_statement | if_statement | while_statement
         
         Procesa sentencias:
         - Declaraciones de variables
         - Asignaciones
-        - Instrucciones de impresión
+        - Instrucciones de mostrar
         - Estructuras condicionales
         - Estructuras de bucle
         """
         if self.current_token.type == TokenType.VAR:
             return self.var_declaration()
-        elif self.current_token.type == TokenType.PRINT:
-            return self.print_statement()
+        elif self.current_token.type == TokenType.MOSTRAR:
+            return self.mostrar_statement()
         elif self.current_token.type == TokenType.SI:
             return self.if_statement()
         elif self.current_token.type == TokenType.MIENTRAS:
@@ -377,7 +376,7 @@ class Parser:
             statements.append(statement)
             
             # Solo agregar punto y coma después de sentencias simples
-            if (isinstance(statement, (VarDecl, Assign, Print)) and 
+            if (isinstance(statement, (VarDecl, Assign, Mostrar)) and 
                 self.current_token.type == TokenType.SEMICOLON):
                 self.eat(TokenType.SEMICOLON)
         

@@ -3,7 +3,7 @@ from enum import Enum, auto
 class TokenType(Enum):
     # Palabras clave
     VAR = auto()
-    PRINT = auto()
+    MOSTRAR = auto()
     
     # Estructuras de control
     SI = auto()
@@ -94,7 +94,7 @@ class Lexer:
         if self.current_char == '"':
             self.advance()  # Saltar la comilla final
             return result
-        else:
+        else:   
             self.error()  # Cadena no cerrada
 
     def get_next_token(self):
@@ -115,8 +115,8 @@ class Lexer:
                 # Palabras clave (más específicas primero)
                 if identifier == 'var':
                     return Token(TokenType.VAR, identifier)
-                elif identifier == 'print':
-                    return Token(TokenType.PRINT, identifier)
+                elif identifier == 'mostrar':
+                    return Token(TokenType.MOSTRAR, identifier)
                 elif identifier == 'si':
                     return Token(TokenType.SI, identifier)
                 elif identifier == 'entonces':

@@ -1,7 +1,7 @@
 import sys
 import os
 from typing import List, Dict, Any
-from .parser import AST, BinOp, Num, Var, Assign, Print, VarDecl
+from .parser import AST, BinOp, Num, Var, Assign, Mostrar, VarDecl
 import graphviz
 
 class DevelopmentTools:
@@ -33,8 +33,8 @@ class DevelopmentTools:
                 label = f"Var: {node.value}"
             elif isinstance(node, Assign):
                 label = "Assign"
-            elif isinstance(node, Print):
-                label = "Print"
+            elif isinstance(node, Mostrar):
+                label = "Mostrar"
             elif isinstance(node, VarDecl):
                 label = "VarDecl"
             else:
@@ -52,7 +52,7 @@ class DevelopmentTools:
             elif isinstance(node, Assign):
                 add_node(node.left, node_id)
                 add_node(node.right, node_id)
-            elif isinstance(node, Print):
+            elif isinstance(node, Mostrar):
                 add_node(node.expr, node_id)
             elif isinstance(node, VarDecl):
                 add_node(node.var_node, node_id)
@@ -79,7 +79,7 @@ class DevelopmentTools:
         elif isinstance(node, Assign):
             state['variable'] = node.left.value
             state['value'] = self._get_node_value(node.right)
-        elif isinstance(node, Print):
+        elif isinstance(node, Mostrar):
             state['value'] = self._get_node_value(node.expr)
         
         self.execution_history.append(state)

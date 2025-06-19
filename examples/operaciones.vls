@@ -8,15 +8,15 @@ y = 5;
 z = 3;
 w = 2;
 
-print(x sumar y);
-print(x restar y);
-print(x multiplicar y);
-print(x dividir y);
-print(x potencia w);
+mostrar(x sumar y);
+mostrar(x restar y);
+mostrar(x multiplicar y);
+mostrar(x dividir y);
+mostrar(x potencia w);
 
-print(x sumar y multiplicar z);
-print(x sumar (y multiplicar z));
-print((x sumar y) multiplicar z);
+mostrar(x sumar y multiplicar z);
+mostrar(x sumar (y multiplicar z));
+mostrar((x sumar y) multiplicar z);
 
-print(x potencia 2 sumar y potencia 2);
-print((x sumar y) dividir (z sumar w)); 
+mostrar(x potencia 2 sumar y potencia 2);
+mostrar((x sumar y) dividir (z sumar w)); 

@@ -3,7 +3,7 @@ from tkinter import ttk, scrolledtext
 import time
 from typing import List, Dict
 from lexer import Lexer, Token, TokenType
-from parser import Parser, AST, BinOp, Num, Var, Assign, Print, VarDecl, Condition, LogicalOp, If, While
+from parser import Parser, AST, BinOp, Num, Var, Assign, Mostrar, VarDecl, Condition, LogicalOp, If, While
 from semantic import SemanticAnalyzer
 import threading
 import math
@@ -22,7 +22,7 @@ class TokenCard:
         # Colores para diferentes tipos de tokens
         self.colors = {
             TokenType.VAR: "#FF6B6B",           # Rojo claro
-            TokenType.PRINT: "#4ECDC4",         # Turquesa
+            TokenType.MOSTRAR: "#4ECDC4",       # Turquesa
             TokenType.SI: "#45B7D1",            # Azul claro
             TokenType.ENTONCES: "#96CEB4",      # Verde claro
             TokenType.FIN_SI: "#FFEAA7",        # Amarillo claro
@@ -405,13 +405,12 @@ class CompilerGUI:
                     time.sleep(0.1)
                     print_ast(node.left, level + 1)
                     print_ast(node.right, level + 1)
-                elif isinstance(node, Print):
+                elif isinstance(node, Mostrar):
                     info = f"{type(node).__name__}"
                     self.parse_output.insert(tk.END, f"{indent}{info}\n")
                     self.parse_output.see(tk.END)
                     self.root.update()
                     time.sleep(0.1)
-                    print_ast(node.expr, level + 1)
                 elif isinstance(node, VarDecl):
                     info = f"{type(node).__name__}"
                     self.parse_output.insert(tk.END, f"{indent}{info}\n")
@@ -601,7 +600,7 @@ class CompilerGUI:
                 self.root.update()
                 time.sleep(0.5)  # Más lento para paso a paso
                 
-                if isinstance(node, (BinOp, Num, Var, Assign, Print, VarDecl, Condition, LogicalOp, If, While)):
+                if isinstance(node, (BinOp, Num, Var, Assign, Mostrar, VarDecl, Condition, LogicalOp, If, While)):
                     semantic_analyzer.visit(node)
             
             analyze_node_step(self.ast)

@@ -15,4 +15,9 @@ mientras edad menor 30 hacer
     edad = edad sumar 1;
 fin_mientras
 
-mostrar(nombre concatenar " tiene " concatenar edad); 
+mostrar(nombre concatenar " tiene " concatenar edad);
+
+mostrar(x);
+mostrar(x sumar y);
+mostrar(i);
+mostrar(i); 

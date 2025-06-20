@@ -1,32 +1,23 @@
-// Ejemplo de estructuras de control en VLS
+var nombre;
+var edad;
+var resultado;
 
-var x;
-var y;
-var i;
+nombre = "Juan";
+edad = 25;
+resultado = edad multiplicar 2;
 
-x = 10;
-y = 5;
+si edad mayor 18 entonces
+    mostrar("Eres mayor de edad");
+fin_si
 
-// Estructura condicional simple
-si (x mayor y) entonces
-    print(x);
-fin_si;
+mientras edad menor 30 hacer
+    mostrar(edad);
+    edad = edad sumar 1;
+fin_mientras
 
-// Estructura condicional con operadores lógicos
-si (x mayor 0 Y y mayor 0) entonces
-    print(x sumar y);
-fin_si;
+mostrar(nombre concatenar " tiene " concatenar edad);
 
-// Bucle while simple
-i = 1;
-mientras (i menor_igual 5) hacer
-    print(i);
-    i = i sumar 1;
-fin_mientras;
-
-// Bucle while con condición compuesta
-i = 10;
-mientras (i mayor 0 Y i diferente 5) hacer
-    print(i);
-    i = i restar 1;
-fin_mientras; 
+mostrar(x);
+mostrar(x sumar y);
+mostrar(i);
+mostrar(i); 

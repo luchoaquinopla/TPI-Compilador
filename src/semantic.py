@@ -1,4 +1,4 @@
-from parser import AST, BinOp, Num, Var, Assign, Print, VarDecl, Condition, LogicalOp, If, While, String
+from parser import AST, BinOp, Num, Var, Assign, Mostrar, VarDecl, Condition, LogicalOp, If, While, String
 
 class SemanticError(Exception):
     pass
@@ -32,10 +32,11 @@ class SemanticAnalyzer:
         
         # Concatenación de cadenas
         if node.op.type.name == 'CONCATENAR':
-            if left_type == str and right_type == str:
+            # Permitir concatenación si alguno es cadena, convirtiendo ambos a str
+            if left_type == str or right_type == str:
                 return str
             else:
-                raise SemanticError("La operación 'concatenar' solo es válida entre cadenas")
+                raise SemanticError("La operación 'concatenar' solo es válida entre cadenas o tipos convertibles a cadena")
         # Operaciones numéricas
         if left_type == int and right_type == int:
             return int

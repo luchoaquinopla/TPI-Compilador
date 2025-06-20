@@ -129,7 +129,7 @@ class Parser:
         
         elif token.type == TokenType.LPAREN:
             self.eat(TokenType.LPAREN)
-            node = self.expr()
+            node = self.logical_expr()
             self.eat(TokenType.RPAREN)
             return node
         
